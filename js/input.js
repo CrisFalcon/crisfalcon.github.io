@@ -6,14 +6,13 @@ export default class Inputs {
     mouseEvents(event) {
         const rect = this.canvas.getBoundingClientRect();
         this.mouse.x = event.clientX - rect.left;
-         this.mouse.y = event.clientY - rect.top;
- 
-         if (event.type === 'mousedown') {
-             this.mouse.hold = true;
-         }
-         else if (event.type === 'mouseup') {
-             this.mouse.hold = false;
-         }
+        this.mouse.y = event.clientY - rect.top;
 
+        if (event.type === 'mousedown') {
+            this.mouse.hold = true;
+        }
+        else if (event.type === 'mouseup') {
+            this.mouse.hold = false;
+        }
     }
 }

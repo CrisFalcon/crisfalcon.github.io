@@ -1,7 +1,9 @@
 import Snow from './snow.js';
 import Menu from './menu.js';
 import Inputs from './input.js';
+import Button from './button.js';
 
+//min button size = 42
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 var CANVAS_WIDTH = canvas.width = window.innerWidth;
@@ -16,7 +18,8 @@ const MAX_SNOW = 500;
 
 const BACKGROUND_COLOR = `rgb(83, 79, 104)`;
 const MENU_BG_COLOR = 'rgba(0,0,0,0.23)';
-const BUTTON_COLOR = `rgb(255, 255, 255)`;
+const BUTTON_COLOR = `rgb(200, 200, 200)`;
+const BUTTON_COLOR_OVER = `rgb(100, 100, 100)`;
 
 const input = new Inputs(canvas);
 canvas.addEventListener('mousemove', input.mouseEvents.bind(input));
@@ -55,17 +58,27 @@ function HandleMenu() {
 }
 //#endregion
 
-function DrawBackground() {
-    ctx.fillStyle = BACKGROUND_COLOR;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
 
-function DrawCircle(x, y, radius) {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = BACKGROUND_COLOR;
-    ctx.fill();
-    ctx.stroke();
+var itch = "https://crisfalcon.itch.io";
+const button = new Button(canvas.width / 2 - 100, canvas.height / 2 - 100,
+    200, BUTTON_COLOR, BUTTON_COLOR_OVER, itch);
+
+var currentButton = undefined;
+function HandleButtons() {
+    button.draw(ctx, input.mouse.x, input.mouse.y);
+    AssignCurrentButton();
+    if (currentButton != null)
+        currentButton.changePosition(input.mouse.x - button.size / 2, input.mouse.y - button.size / 2);
+
+}
+function AssignCurrentButton() {
+    if (input.mouse.hold && currentButton != null) return;
+    if (!input.mouse.hold) {
+        currentButton = null;
+        return;
+    }
+    if (button.isMouseOver(input.mouse.x, input.mouse.y))
+        currentButton = button
 }
 
 function Update() {
@@ -73,10 +86,13 @@ function Update() {
     CleanCanvas();
     DrawBackground();
     UpdateSnow();
-    DrawCircle(input.mouse.x, input.mouse.y, input.mouse.hold ? 15 : 0);
-    
+
+    if (currentButton == null) {
+        DrawCircle(input.mouse.x, input.mouse.y, input.mouse.hold ? 15 : 0);
+        SpawnSnow();
+    }
     HandleMenu();
-    SpawnSnow();
+    HandleButtons();
 
     requestAnimationFrame(Update);
 }
@@ -96,4 +112,17 @@ function Resize() {
 
     if (prevH != CANVAS_HEIGHT || prevW != CANVAS_WIDTH) canvasResized = true;
     else canvasResized = false;
+}
+
+function DrawCircle(x, y, radius) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = BACKGROUND_COLOR;
+    ctx.fill();
+    ctx.stroke();
+}
+
+function DrawBackground() {
+    ctx.fillStyle = BACKGROUND_COLOR;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
