@@ -2,12 +2,14 @@ import Snow from './snow.js';
 import Menu from './menu.js';
 import Inputs from './input.js';
 import Button from './button.js';
+import Title from './title.js';
 
 //min button size = 42
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 var CANVAS_WIDTH = canvas.width = window.innerWidth;
 var CANVAS_HEIGHT = canvas.height = window.innerHeight;
+var currentScale = 1;
 var canvasResized = true;
 
 const SNOW_AMOUNT = 200;
@@ -46,20 +48,28 @@ function SpawnSnow() {
 }
 //#endregion
 
-//#region  menu
-var menu = new Menu(CANVAS_WIDTH, CANVAS_HEIGHT, MENU_BG_COLOR);
+//#region  Menu👽
+const menu = new Menu(CANVAS_WIDTH, CANVAS_HEIGHT, MENU_BG_COLOR);
+const logo = new Title(0.4);
+logo.updateValues(CANVAS_WIDTH, menu);
+
 function DrawMenuBackground() {
     if (canvasResized) menu.updateValues(CANVAS_WIDTH, CANVAS_HEIGHT);
     menu.draw(ctx);
 }
+function DrawLogo() {
+    if (canvasResized) logo.updateValues(CANVAS_WIDTH, menu);
+    logo.draw(ctx);
+}
 
 function HandleMenu() {
     DrawMenuBackground();
+    DrawLogo();
 }
 //#endregion
 
 
-var itch = "https://crisfalcon.itch.io";
+/*var itch = "https://crisfalcon.itch.io";
 const button = new Button(canvas.width / 2 - 100, canvas.height / 2 - 100,
     200, BUTTON_COLOR, BUTTON_COLOR_OVER, itch);
 
@@ -79,20 +89,18 @@ function AssignCurrentButton() {
     }
     if (button.isMouseOver(input.mouse.x, input.mouse.y))
         currentButton = button
-}
+}*/
+
 
 function Update() {
     Resize();
     CleanCanvas();
     DrawBackground();
     UpdateSnow();
-
-    if (currentButton == null) {
-        DrawCircle(input.mouse.x, input.mouse.y, input.mouse.hold ? 15 : 0);
-        SpawnSnow();
-    }
+    DrawCircle(input.mouse.x, input.mouse.y, input.mouse.hold ? 15 : 0);
+    SpawnSnow();
     HandleMenu();
-    HandleButtons();
+
 
     requestAnimationFrame(Update);
 }
@@ -109,6 +117,8 @@ function Resize() {
 
     CANVAS_WIDTH = canvas.width = window.innerWidth;
     CANVAS_HEIGHT = canvas.height = window.innerHeight;
+
+    currentScale = canvas.height < canvas.width ? canvas.height : canvas.width;
 
     if (prevH != CANVAS_HEIGHT || prevW != CANVAS_WIDTH) canvasResized = true;
     else canvasResized = false;
