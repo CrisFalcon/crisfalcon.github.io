@@ -1,14 +1,14 @@
 export default class Button {
-    constructor(x, y, size, defaultColor, colorOver, url) {
+    constructor(x, y, scale, defaultColor, colorOver, url) {
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.width = scale;
+        this.height = this.width * 0.55;
         this.defaultColor = defaultColor;
         this.color = this.defaultColor;
         this.colorOver = colorOver;
         this.url = url;
         this.sinScale = 1;
-        this.startScale = this.size;
     }
 
     draw(context, x, y) {
@@ -22,14 +22,19 @@ export default class Button {
        // this.size = this.startScale * Math.abs(Math.sin(this.sinScale)) + 20;
 
         context.fillStyle = this.color;
-        context.fillRect(this.x, this.y, this.size, this.size);
+        context.fillRect(this.x, this.y, this.width, this.height);
     }
     isMouseOver(x, y) {
-        return (x >= this.x && x <= this.x + this.startScale
-            && y >= this.y && y <= this.y + this.startScale);
+        return (x >= this.x && x <= this.x + this.width
+            && y >= this.y && y <= this.y + this.height);
     }
     changePosition(x, y) {
         this.x = x;
         this.y = y;
+    }
+    changeScale(scale)
+    {
+        this.width = scale;
+        this.height = this.width * 0.55;
     }
 }

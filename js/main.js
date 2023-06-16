@@ -11,6 +11,7 @@ var CANVAS_WIDTH = canvas.width = window.innerWidth;
 var CANVAS_HEIGHT = canvas.height = window.innerHeight;
 var currentScale = 1;
 var canvasResized = true;
+const SMALL_DISPLAY = 900;
 
 const SNOW_AMOUNT = 200;
 const SNOW_COLOR = `rgb(130, 130, 150)`
@@ -50,7 +51,9 @@ function SpawnSnow() {
 
 //#region  Menu👽
 const menu = new Menu(CANVAS_WIDTH, CANVAS_HEIGHT, MENU_BG_COLOR);
-const logo = new Title(0.4);
+const LOGO_SCALE_BIG = 0.8;
+const LOGO_SCALE_SMALL = 0.4;
+const logo = new Title(LOGO_SCALE_SMALL);
 logo.updateValues(CANVAS_WIDTH, menu);
 
 function DrawMenuBackground() {
@@ -58,39 +61,91 @@ function DrawMenuBackground() {
     menu.draw(ctx);
 }
 function DrawLogo() {
-    if (canvasResized) logo.updateValues(CANVAS_WIDTH, menu);
+    logo.updateValues(CANVAS_WIDTH, menu);
     logo.draw(ctx);
 }
 
 function HandleMenu() {
     DrawMenuBackground();
+    logo.scalePercent = CANVAS_WIDTH <= SMALL_DISPLAY ? LOGO_SCALE_BIG : LOGO_SCALE_SMALL;
     DrawLogo();
 }
 //#endregion
 
-
-/*var itch = "https://crisfalcon.itch.io";
-const button = new Button(canvas.width / 2 - 100, canvas.height / 2 - 100,
-    200, BUTTON_COLOR, BUTTON_COLOR_OVER, itch);
-
-var currentButton = undefined;
-function HandleButtons() {
-    button.draw(ctx, input.mouse.x, input.mouse.y);
-    AssignCurrentButton();
-    if (currentButton != null)
-        currentButton.changePosition(input.mouse.x - button.size / 2, input.mouse.y - button.size / 2);
-
-}
-function AssignCurrentButton() {
-    if (input.mouse.hold && currentButton != null) return;
-    if (!input.mouse.hold) {
-        currentButton = null;
-        return;
+//#region buttons⭕
+const buttons = [];
+const STARTING_BUTTON_SCALE = 0.7;
+var buttonScale = STARTING_BUTTON_SCALE;
+var buttonSize = logo.width * buttonScale * logo.scale;
+function FetchAvailableButtons() {
+    for (let index = 0; index < 5; index++) {
+        buttons.push(new Button(100, 400 * index, buttonSize, BUTTON_COLOR, BUTTON_COLOR_OVER, ""));
     }
-    if (button.isMouseOver(input.mouse.x, input.mouse.y))
-        currentButton = button
-}*/
+}
+FetchAvailableButtons();
 
+function ReOrganizeButtons(small) {
+    let amountPerLine = small ? 1 : Math.floor((menu.width / buttonSize));
+    let pad = (menu.width - (buttonSize * amountPerLine)) / amountPerLine;
+    let startPosY = menu.centerY + logo.height * logo.scale + (logo.yPadding * logo.scale);
+    let yPad = small ? (buttonSize * 0.55) / 3 : pad;
+    let totalRows = Math.ceil(buttons.length / amountPerLine);
+    let missingAmount = (amountPerLine * totalRows) - buttons.length;
+    let lastLineAmount = amountPerLine - missingAmount;
+
+    let amount = 0;
+    let row = 0;
+
+    for (let index = 0; index < buttons.length; index++) {
+
+        if (row === totalRows - 1 && missingAmount != 0) 
+        {
+            if (lastLineAmount != 2) 
+            {
+                pad = (menu.width - (buttonSize * lastLineAmount)) / lastLineAmount;
+                buttons[index].x = menu.centerX + pad / 2 + (pad + buttonSize) * amount;
+            }
+            else 
+            {
+                let screenCenter = menu.centerX + menu.width / 2;
+                let dir = amount === 0 ? -(buttonSize + pad / 2) : pad / 2;
+                buttons[index].x = screenCenter + dir;
+            }
+        }
+        else buttons[index].x = menu.centerX + pad / 2 + (pad + buttonSize) * amount;
+
+        buttons[index].y = startPosY + yPad + (buttonSize * 0.55 + yPad) * row;
+
+        amount++;
+        if (amount === amountPerLine) {
+            row++;
+            amount = 0;
+        }
+    }
+}
+
+
+function ButtonHandler() {
+    buttonScale = CANVAS_WIDTH <= SMALL_DISPLAY ? 1 : STARTING_BUTTON_SCALE;
+    buttonSize = logo.width * buttonScale * logo.scale;
+    buttons.forEach(x => {
+        x.changeScale(buttonSize);
+        x.draw(ctx, input.mouse.x, input.mouse.y);
+    });
+    ReOrganizeButtons(CANVAS_WIDTH <= SMALL_DISPLAY);
+}
+//#endregion
+
+var timerTest = 0;
+function Test()
+{
+    timerTest++;
+    if(timerTest >= 0)
+    {
+        timerTest = 0;
+        menu.centerY -= 10;
+    }
+}
 
 function Update() {
     Resize();
@@ -100,6 +155,8 @@ function Update() {
     DrawCircle(input.mouse.x, input.mouse.y, input.mouse.hold ? 15 : 0);
     SpawnSnow();
     HandleMenu();
+    ButtonHandler();
+    //Test();
 
 
     requestAnimationFrame(Update);

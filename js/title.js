@@ -2,7 +2,7 @@ export default class Title {
     constructor(scalePercent) {
         this.image = document.getElementById("logoImage");
         this.scalePercent = scalePercent;
-        this.width = 1490;
+        this.width = 1489.7;
         this.height = 690;
         this.x = 0;
         this.y = 0;
@@ -10,11 +10,9 @@ export default class Title {
         this.frameY = 0;
         this.timer = 0;
         this.scale = 1;
-        //this.startingScale = scale;
+        this.yPadding = 50 * scalePercent;
     }
     draw(context) {
-        
-        //context.drawImage(this.image, this.x, this.y, this.width, this.height);
         context.drawImage(this.image, this.width * this.frameX, this.height * this.frameY,
             this.width, this.height, this.x, this.y, this.width * this.scale, this.height * this.scale);
 
@@ -26,10 +24,8 @@ export default class Title {
     }
     updateValues(screenWidth, menu) {
         this.scale = (Math.min(menu.width / this.width, menu.height / this.height)) * this.scalePercent;
-        //this.scale = currentScale / currentScale * this.scalePercent;
         this.x = (screenWidth - screenWidth / 2) - (this.width * (this.scale)) / 2;
-        this.y = (menu.height) - (menu.height);
-
+        this.y = menu.centerY + (menu.height - menu.height) + (this.yPadding * this.scale);
     }
 
 }
