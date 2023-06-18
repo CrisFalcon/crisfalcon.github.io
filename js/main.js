@@ -29,6 +29,15 @@ canvas.addEventListener('mousemove', input.mouseEvents.bind(input));
 canvas.addEventListener('mousedown', input.mouseEvents.bind(input));
 canvas.addEventListener('mouseup', input.mouseEvents.bind(input));
 
+const allButtonData = [
+    { name: "games", url: "https://crisfalcon.itch.io", img: document.getElementById("twitterLogo") },
+    { name: "twitter", url: "https://twitter.com/crisfalcondev", img: document.getElementById("twitterLogo") },
+    { name: "github", url: "https://github.com/CrisFalcon", img: document.getElementById("twitterLogo") },
+    { name: "github", url: "https://github.com/CrisFalcon", img: document.getElementById("twitterLogo") }
+];
+//,{name: "github", url: "https://github.com/CrisFalcon", img: ""}  ]
+
+
 //#region Snow❄️
 for (let index = 0; index < SNOW_AMOUNT; index++) {
     snowArray.push(new Snow(Math.random() * canvas.width, Math.random() * canvas.height, SNOW_COLOR));
@@ -56,6 +65,8 @@ const LOGO_SCALE_SMALL = 0.4;
 const logo = new Title(LOGO_SCALE_SMALL);
 logo.updateValues(CANVAS_WIDTH, menu);
 
+
+
 function DrawMenuBackground() {
     if (canvasResized) menu.updateValues(CANVAS_WIDTH, CANVAS_HEIGHT);
     menu.draw(ctx);
@@ -67,8 +78,8 @@ function DrawLogo() {
 
 function HandleMenu() {
     DrawMenuBackground();
-    logo.scalePercent = CANVAS_WIDTH <= SMALL_DISPLAY ? LOGO_SCALE_BIG : LOGO_SCALE_SMALL;
     DrawLogo();
+    logo.scalePercent = CANVAS_WIDTH <= SMALL_DISPLAY? LOGO_SCALE_BIG : LOGO_SCALE_SMALL;
 }
 //#endregion
 
@@ -78,8 +89,8 @@ const STARTING_BUTTON_SCALE = 0.7;
 var buttonScale = STARTING_BUTTON_SCALE;
 var buttonSize = logo.width * buttonScale * logo.scale;
 function FetchAvailableButtons() {
-    for (let index = 0; index < 5; index++) {
-        buttons.push(new Button(100, 400 * index, buttonSize, BUTTON_COLOR, BUTTON_COLOR_OVER, ""));
+    for (let index = 0; index < allButtonData.length; index++) {
+        buttons.push(new Button(100, 400 * index, buttonSize, BUTTON_COLOR, BUTTON_COLOR_OVER, allButtonData[index]));
     }
 }
 FetchAvailableButtons();
@@ -98,19 +109,14 @@ function ReOrganizeButtons(small) {
 
     for (let index = 0; index < buttons.length; index++) {
 
-        if (row === totalRows - 1 && missingAmount != 0) 
-        {
-            if (lastLineAmount != 2) 
-            {
+        if (row === totalRows - 1 && missingAmount != 0) {
+            if (lastLineAmount != 2) {
                 pad = (menu.width - (buttonSize * lastLineAmount)) / lastLineAmount;
                 buttons[index].x = menu.centerX + pad / 2 + (pad + buttonSize) * amount;
             }
-            else 
-            {
-                let screenCenter = menu.centerX + menu.width / 2;
-                let dir = amount === 0 ? -(buttonSize + pad / 2) : pad / 2;
-                buttons[index].x = screenCenter + dir;
-            }
+            else buttons[index].x = amount === 0 ? (menu.centerX + menu.width / 2) - (buttonSize + pad / 2)
+                : (menu.centerX + menu.width / 2) + pad / 2;
+
         }
         else buttons[index].x = menu.centerX + pad / 2 + (pad + buttonSize) * amount;
 
@@ -126,28 +132,32 @@ function ReOrganizeButtons(small) {
 
 
 function ButtonHandler() {
-    buttonScale = CANVAS_WIDTH <= SMALL_DISPLAY ? 1 : STARTING_BUTTON_SCALE;
+    var small = CANVAS_WIDTH <= SMALL_DISPLAY;
+    buttonScale = small ? 1 : STARTING_BUTTON_SCALE;
     buttonSize = logo.width * buttonScale * logo.scale;
     buttons.forEach(x => {
         x.changeScale(buttonSize);
         x.draw(ctx, input.mouse.x, input.mouse.y);
+        if (x.isMouseOver(input.mouse.x, input.mouse.y) && input.mouse.clicked) {
+            //window.location.href = x.data.url;
+            window.open(x.data.url, "_blank");
+        }
     });
-    ReOrganizeButtons(CANVAS_WIDTH <= SMALL_DISPLAY);
+    ReOrganizeButtons(small);
 }
 //#endregion
 
 var timerTest = 0;
-function Test()
-{
+function Test() {
     timerTest++;
-    if(timerTest >= 0)
-    {
+    if (timerTest >= 0) {
         timerTest = 0;
         menu.centerY -= 10;
     }
 }
 
 function Update() {
+    input.update();
     Resize();
     CleanCanvas();
     DrawBackground();

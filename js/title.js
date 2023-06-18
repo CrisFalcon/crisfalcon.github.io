@@ -13,6 +13,7 @@ export default class Title {
         this.yPadding = 50 * scalePercent;
     }
     draw(context) {
+
         context.drawImage(this.image, this.width * this.frameX, this.height * this.frameY,
             this.width, this.height, this.x, this.y, this.width * this.scale, this.height * this.scale);
 
