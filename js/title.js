@@ -1,27 +1,19 @@
+import AnimatedImage from "./anImage.js";
+
 export default class Title {
     constructor(scalePercent) {
-        this.image = document.getElementById("logoImage");
         this.scalePercent = scalePercent;
         this.width = 1489.7;
         this.height = 690;
         this.x = 0;
         this.y = 0;
-        this.frameX = 0;
-        this.frameY = 0;
-        this.timer = 0;
         this.scale = 1;
         this.yPadding = 50 * scalePercent;
+        this.img = new AnimatedImage(document.getElementById("logoImage"), this.width, this.height, 3);
+        this.img.frameTime = 14;
     }
     draw(context) {
-
-        context.drawImage(this.image, this.width * this.frameX, this.height * this.frameY,
-            this.width, this.height, this.x, this.y, this.width * this.scale, this.height * this.scale);
-
-        this.timer++;
-        if (this.timer >= 10) {
-            this.frameX = this.frameX + 1 > 2 ? 0 : this.frameX + 1;
-            this.timer = 0;
-        }
+        this.img.draw(context, this.x, this.y, this.width * this.scale, this.height * this.scale);
     }
     updateValues(screenWidth, menu) {
         this.scale = (Math.min(menu.width / this.width, menu.height / this.height)) * this.scalePercent;

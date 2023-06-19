@@ -30,10 +30,10 @@ canvas.addEventListener('mousedown', input.mouseEvents.bind(input));
 canvas.addEventListener('mouseup', input.mouseEvents.bind(input));
 
 const allButtonData = [
-    { name: "games", url: "https://crisfalcon.itch.io", img: document.getElementById("twitterLogo") },
+    { name: "games", url: "https://crisfalcon.itch.io", img: document.getElementById("itchLogo") },
     { name: "twitter", url: "https://twitter.com/crisfalcondev", img: document.getElementById("twitterLogo") },
-    { name: "github", url: "https://github.com/CrisFalcon", img: document.getElementById("twitterLogo") },
-    { name: "github", url: "https://github.com/CrisFalcon", img: document.getElementById("twitterLogo") }
+    { name: "github", url: "https://github.com/CrisFalcon", img: document.getElementById("githubLogo") },
+   // { name: "github", url: "https://github.com/CrisFalcon", img: document.getElementById("twitterLogo") }
 ];
 //,{name: "github", url: "https://github.com/CrisFalcon", img: ""}  ]
 
