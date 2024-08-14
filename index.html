@@ -14,16 +14,41 @@
         text-align: center;
         background-color: black;
       }
+
       #unity-canvas {
         width: 100%;
         height: 100%;
         background: #231F20;
         display: block;
       }
+
+      /* Landscape orientation message */
+      #landscape-message {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 2em;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      @media screen and (orientation: portrait) {
+        #unity-canvas {
+          display: none;
+        }
+        #landscape-message {
+          display: block;
+        }
+      }
     </style>
   </head>
   <body>
     <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="landscape-message">Please rotate your device to landscape mode.</div>
     <script src="Build/Build.loader.js"></script>
     <script>
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -56,8 +81,6 @@
         companyName: "DefaultCompany",
         productName: "Portfolio",
         productVersion: "0.1",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
       }).then(function (unityInstance) {
         window.unityInstance = unityInstance;
       }).catch(function (message) {
