@@ -14,96 +14,78 @@
         text-align: center;
         background-color: black;
       }
+
       #unity-canvas {
         width: 100%;
         height: 100%;
         background: #231F20;
-        display: none; /* Hide canvas initially */
+        display: block;
       }
-      #start-button {
-        position: absolute;
+
+      /* Landscape orientation message */
+      #landscape-message {
+        display: none;
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        padding: 20px 40px;
-        font-size: 24px;
-        background-color: #ffffff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
+        color: white;
+        font-size: 2em;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      @media screen and (orientation: portrait) {
+        #unity-canvas {
+          display: none;
+        }
+        #landscape-message {
+          display: block;
+        }
       }
     </style>
   </head>
   <body>
     <canvas id="unity-canvas" tabindex="-1"></canvas>
-    <button id="start-button" onclick="startUnity()">Start Portfolio</button>
-    
+    <div id="landscape-message">Please rotate your device to landscape mode (desktop version recommended).</div>
     <script src="Build/Build.loader.js"></script>
     <script>
-      function startUnity() {
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+
         var canvas = document.querySelector("#unity-canvas");
-        var button = document.querySelector("#start-button");
+        canvas.style.position = "fixed";
 
-        // Request fullscreen mode
-        if (canvas.requestFullscreen) {
-          canvas.requestFullscreen();
-        } else if (canvas.webkitRequestFullscreen) {
-          canvas.webkitRequestFullscreen();
-        } else if (canvas.msRequestFullscreen) {
-          canvas.msRequestFullscreen();
-        }
-
-        // Lock orientation to landscape
-        screen.orientation.lock("landscape").catch(function(error) {
-          console.log("Orientation lock failed:", error);
-        });
-
-        // Hide the start button and show the canvas
-        button.style.display = "none";
-        canvas.style.display = "block";
-
-        createUnityInstance(canvas, {
-          dataUrl: "Build/Build.data",
-          frameworkUrl: "Build/Build.framework.js",
-          codeUrl: "Build/Build.wasm",
-          streamingAssetsUrl: "StreamingAssets",
-          companyName: "DefaultCompany",
-          productName: "Portfolio",
-          productVersion: "0.1",
-          // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-          // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
-        }).then(function (unityInstance) {
-          window.unityInstance = unityInstance;
-        }).catch(function (message) {
-          alert(message);
-        });
+        document.body.style.textAlign = "left";
       }
 
-      function init() {
-        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        var isDesktop = !isMobile;
-
-        var button = document.querySelector("#start-button");
-
-        if (isMobile) {
-          var meta = document.createElement('meta');
-          meta.name = 'viewport';
-          meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-          document.getElementsByTagName('head')[0].appendChild(meta);
-
-          document.body.style.textAlign = "left";
-        }
-
-        if (isDesktop || isMobile) {
-          button.style.display = "none"; // Hide the button on both iOS and desktop
-          startUnity(); // Automatically start Unity
-        } else {
-          button.style.display = "block"; // Show the button on other platforms if needed
-        }
+      function resizeCanvas() {
+        var canvas = document.querySelector("#unity-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
       }
 
-      // Call init on page load
-      window.onload = init;
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        dataUrl: "Build/Build.data",
+        frameworkUrl: "Build/Build.framework.js",
+        codeUrl: "Build/Build.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Portfolio",
+        productVersion: "0.1",
+      }).then(function (unityInstance) {
+        window.unityInstance = unityInstance;
+      }).catch(function (message) {
+        alert(message);
+      });
     </script>
   </body>
 </html>
