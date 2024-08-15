@@ -31,6 +31,7 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        display: none; /* Hide button by default */
       }
     </style>
   </head>
@@ -70,8 +71,6 @@
           companyName: "DefaultCompany",
           productName: "Portfolio",
           productVersion: "0.1",
-          // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-          // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
         }).then(function (unityInstance) {
           window.unityInstance = unityInstance;
         }).catch(function (message) {
@@ -79,13 +78,24 @@
         });
       }
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      // Detect mobile device
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      // Detect if the platform is iOS
+      var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isMobile && !isIOS) {
+        // Show the start button only on non-iOS mobile devices
+        document.querySelector("#start-button").style.display = "block";
+
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
         document.getElementsByTagName('head')[0].appendChild(meta);
 
         document.body.style.textAlign = "left";
+      } else {
+        // Automatically start Unity on all other platforms
+        startUnity();
       }
     </script>
   </body>
