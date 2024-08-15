@@ -31,49 +31,57 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        z-index: 10;
+      }
+      /* Prompt user to rotate device */
+      #rotate-message {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 24px;
+      }
+      @media only screen and (orientation: portrait) {
+        #rotate-message {
+          display: block;
+        }
+        #start-button {
+          display: none;
+        }
+      }
+      @media only screen and (orientation: landscape) {
+        #rotate-message {
+          display: none;
+        }
+        #start-button {
+          display: block;
+        }
       }
     </style>
   </head>
   <body>
     <canvas id="unity-canvas" tabindex="-1"></canvas>
-    <button id="start-button" onclick="startUnity()">Start Portfolio</button>
-    
+    <div id="rotate-message">Please rotate your device to landscape</div>
+    <button id="start-button" onclick="startUnity()">Start</button>
+
     <script src="Build/Build.loader.js"></script>
     <script>
       function startUnity() {
         var canvas = document.querySelector("#unity-canvas");
         var button = document.querySelector("#start-button");
 
-        // iOS-specific fullscreen handling
-        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          var div = document.createElement("div");
-          div.style.position = "fixed";
-          div.style.left = "0";
-          div.style.top = "0";
-          div.style.width = "100%";
-          div.style.height = "100%";
-          div.style.zIndex = "-1";
-          document.body.appendChild(div);
-          div.appendChild(canvas);
-          canvas.style.position = "fixed";
-          canvas.style.left = "0";
-          canvas.style.top = "0";
-          canvas.style.width = "100%";
-          canvas.style.height = "100%";
-        }
-
-        // Fullscreen handling for other devices
-        if (canvas.requestFullscreen) {
-          canvas.requestFullscreen();
-        } else if (canvas.webkitRequestFullscreen) {
-          canvas.webkitRequestFullscreen();
-        } else if (canvas.msRequestFullscreen) {
-          canvas.msRequestFullscreen();
-        }
-
-        // Hide the start button and show the canvas
-        button.style.display = "none";
+        // Simulate fullscreen for iOS by making the canvas fill the screen
         canvas.style.display = "block";
+        canvas.style.position = "fixed";
+        canvas.style.top = 0;
+        canvas.style.left = 0;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+
+        // Hide the start button
+        button.style.display = "none";
 
         createUnityInstance(canvas, {
           dataUrl: "Build/Build.data",
@@ -83,18 +91,18 @@
           companyName: "DefaultCompany",
           productName: "Portfolio",
           productVersion: "0.1",
-          // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-          // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
         }).then(function (unityInstance) {
           window.unityInstance = unityInstance;
         }).catch(function (message) {
           alert(message);
         });
 
-        // Orientation lock (works only in fullscreen mode on some devices)
-        screen.orientation.lock("landscape").catch(function(error) {
-          console.log("Orientation lock failed:", error);
-        });
+        // Orientation lock for non-iOS (this often doesn't work on iOS)
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(function(error) {
+            console.log("Orientation lock failed:", error);
+          });
+        }
       }
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
