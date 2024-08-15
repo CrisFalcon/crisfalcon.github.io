@@ -31,10 +31,8 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        z-index: 10;
       }
-      /* Prompt user to rotate device */
-      #rotate-message {
+      #landscape-message {
         display: none;
         position: absolute;
         top: 50%;
@@ -42,29 +40,16 @@
         transform: translate(-50%, -50%);
         color: white;
         font-size: 24px;
-      }
-      @media only screen and (orientation: portrait) {
-        #rotate-message {
-          display: block;
-        }
-        #start-button {
-          display: none;
-        }
-      }
-      @media only screen and (orientation: landscape) {
-        #rotate-message {
-          display: none;
-        }
-        #start-button {
-          display: block;
-        }
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 5px;
       }
     </style>
   </head>
   <body>
     <canvas id="unity-canvas" tabindex="-1"></canvas>
-    <div id="rotate-message">Please rotate your device to landscape</div>
-    <button id="start-button" onclick="startUnity()">Start</button>
+    <button id="start-button" onclick="startUnity()">Start (Desktop recommended)</button>
+    <div id="landscape-message">Please rotate your device to landscape mode</div>
 
     <script src="Build/Build.loader.js"></script>
     <script>
@@ -72,16 +57,23 @@
         var canvas = document.querySelector("#unity-canvas");
         var button = document.querySelector("#start-button");
 
-        // Simulate fullscreen for iOS by making the canvas fill the screen
-        canvas.style.display = "block";
-        canvas.style.position = "fixed";
-        canvas.style.top = 0;
-        canvas.style.left = 0;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
+        // Request fullscreen mode
+        if (canvas.requestFullscreen) {
+          canvas.requestFullscreen();
+        } else if (canvas.webkitRequestFullscreen) {
+          canvas.webkitRequestFullscreen();
+        } else if (canvas.msRequestFullscreen) {
+          canvas.msRequestFullscreen();
+        }
 
-        // Hide the start button
+        // Lock orientation to landscape
+        screen.orientation.lock("landscape").catch(function(error) {
+          console.log("Orientation lock failed:", error);
+        });
+
+        // Hide the start button and show the canvas
         button.style.display = "none";
+        canvas.style.display = "block";
 
         createUnityInstance(canvas, {
           dataUrl: "Build/Build.data",
@@ -96,15 +88,24 @@
         }).catch(function (message) {
           alert(message);
         });
+      }
 
-        // Orientation lock for non-iOS (this often doesn't work on iOS)
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock("landscape").catch(function(error) {
-            console.log("Orientation lock failed:", error);
-          });
+      function checkOrientation() {
+        var message = document.getElementById("landscape-message");
+        if (window.innerHeight > window.innerWidth) {
+          message.style.display = "block";
+        } else {
+          message.style.display = "none";
         }
       }
 
+      // Automatically start Unity if on iOS
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        document.getElementById("start-button").style.display = "none"; // Hide the start button
+        startUnity(); // Start the Unity build immediately
+      }
+
+      // Check orientation on iOS
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         var meta = document.createElement('meta');
         meta.name = 'viewport';
@@ -112,6 +113,10 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
 
         document.body.style.textAlign = "left";
+
+        // Check orientation on load and on resize
+        window.addEventListener("resize", checkOrientation);
+        window.addEventListener("load", checkOrientation);
       }
     </script>
   </body>
