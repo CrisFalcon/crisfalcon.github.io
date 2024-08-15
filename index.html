@@ -44,7 +44,25 @@
         var canvas = document.querySelector("#unity-canvas");
         var button = document.querySelector("#start-button");
 
-        // Request fullscreen mode
+        // iOS-specific fullscreen handling
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          var div = document.createElement("div");
+          div.style.position = "fixed";
+          div.style.left = "0";
+          div.style.top = "0";
+          div.style.width = "100%";
+          div.style.height = "100%";
+          div.style.zIndex = "-1";
+          document.body.appendChild(div);
+          div.appendChild(canvas);
+          canvas.style.position = "fixed";
+          canvas.style.left = "0";
+          canvas.style.top = "0";
+          canvas.style.width = "100%";
+          canvas.style.height = "100%";
+        }
+
+        // Fullscreen handling for other devices
         if (canvas.requestFullscreen) {
           canvas.requestFullscreen();
         } else if (canvas.webkitRequestFullscreen) {
@@ -52,11 +70,6 @@
         } else if (canvas.msRequestFullscreen) {
           canvas.msRequestFullscreen();
         }
-
-        // Lock orientation to landscape
-        screen.orientation.lock("landscape").catch(function(error) {
-          console.log("Orientation lock failed:", error);
-        });
 
         // Hide the start button and show the canvas
         button.style.display = "none";
@@ -76,6 +89,11 @@
           window.unityInstance = unityInstance;
         }).catch(function (message) {
           alert(message);
+        });
+
+        // Orientation lock (works only in fullscreen mode on some devices)
+        screen.orientation.lock("landscape").catch(function(error) {
+          console.log("Orientation lock failed:", error);
         });
       }
 
