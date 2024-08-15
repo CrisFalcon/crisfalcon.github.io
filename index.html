@@ -14,121 +14,96 @@
         text-align: center;
         background-color: black;
       }
-
       #unity-canvas {
         width: 100%;
         height: 100%;
         background: #231F20;
-        display: block;
+        display: none; /* Hide canvas initially */
       }
-
-      /* iOS orientation message */
-      #ios-landscape-message {
-        display: none;
-        position: fixed;
+      #start-button {
+        position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: white;
-        font-size: 2em;
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 20px;
-        border-radius: 10px;
-      }
-
-      @media screen and (orientation: portrait) {
-        #unity-canvas.ios-landscape-hidden {
-          display: none;
-        }
-        #ios-landscape-message {
-          display: block;
-        }
-      }
-
-      /* Button for non-iOS mobile devices */
-      #fullscreen-button {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 15px 30px;
-        background-color: #007bff;
-        color: white;
-        font-size: 1.2em;
+        padding: 20px 40px;
+        font-size: 24px;
+        background-color: #ffffff;
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        z-index: 1000;
       }
     </style>
   </head>
   <body>
     <canvas id="unity-canvas" tabindex="-1"></canvas>
-    <div id="ios-landscape-message">Please rotate your device to landscape mode.</div>
-    <button id="fullscreen-button">Go Fullscreen</button>
+    <button id="start-button" onclick="startUnity()">Start Portfolio</button>
+    
     <script src="Build/Build.loader.js"></script>
     <script>
-      function isIOS() {
-        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      }
-
-      function isMobile() {
-        return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      }
-
-      function enterFullscreen() {
-        var elem = document.documentElement;
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) { // Firefox
-          elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
-          elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { // IE/Edge
-          elem.msRequestFullscreen();
-        }
-      }
-
-      if (isIOS()) {
-        // iOS specific settings
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-
+      function startUnity() {
         var canvas = document.querySelector("#unity-canvas");
-        canvas.classList.add('ios-landscape-hidden');
-      } else if (isMobile()) {
-        // Non-iOS mobile devices: show fullscreen button
-        document.querySelector("#fullscreen-button").style.display = 'block';
-        document.querySelector("#fullscreen-button").addEventListener('click', function() {
-          enterFullscreen();
+        var button = document.querySelector("#start-button");
+
+        // Request fullscreen mode
+        if (canvas.requestFullscreen) {
+          canvas.requestFullscreen();
+        } else if (canvas.webkitRequestFullscreen) {
+          canvas.webkitRequestFullscreen();
+        } else if (canvas.msRequestFullscreen) {
+          canvas.msRequestFullscreen();
+        }
+
+        // Lock orientation to landscape
+        screen.orientation.lock("landscape").catch(function(error) {
+          console.log("Orientation lock failed:", error);
+        });
+
+        // Hide the start button and show the canvas
+        button.style.display = "none";
+        canvas.style.display = "block";
+
+        createUnityInstance(canvas, {
+          dataUrl: "Build/Build.data",
+          frameworkUrl: "Build/Build.framework.js",
+          codeUrl: "Build/Build.wasm",
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "DefaultCompany",
+          productName: "Portfolio",
+          productVersion: "0.1",
+          // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+          // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+        }).then(function (unityInstance) {
+          window.unityInstance = unityInstance;
+        }).catch(function (message) {
+          alert(message);
         });
       }
 
-      function resizeCanvas() {
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+      function init() {
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        var isDesktop = !isMobile;
+
+        var button = document.querySelector("#start-button");
+
+        if (isMobile) {
+          var meta = document.createElement('meta');
+          meta.name = 'viewport';
+          meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+          document.getElementsByTagName('head')[0].appendChild(meta);
+
+          document.body.style.textAlign = "left";
+        }
+
+        if (isDesktop || isMobile) {
+          button.style.display = "none"; // Hide the button on both iOS and desktop
+          startUnity(); // Automatically start Unity
+        } else {
+          button.style.display = "block"; // Show the button on other platforms if needed
+        }
       }
 
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
-
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/Build.data",
-        frameworkUrl: "Build/Build.framework.js",
-        codeUrl: "Build/Build.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Portfolio",
-        productVersion: "0.1",
-      }).then(function (unityInstance) {
-        window.unityInstance = unityInstance;
-      }).catch(function (message) {
-        alert(message);
-      });
+      // Call init on page load
+      window.onload = init;
     </script>
   </body>
 </html>
