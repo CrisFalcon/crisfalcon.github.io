@@ -36,6 +36,20 @@
         border-radius: 10px;
       }
 
+      /* Loading progress message */
+      #loading-progress {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 2em;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        display: none; /* Initially hidden */
+      }
+
       @media screen and (orientation: portrait) {
         #unity-canvas {
           display: none;
@@ -57,6 +71,8 @@
     <canvas id="unity-canvas" tabindex="-1"></canvas>
     <div id="landscape-message">Please rotate your device to landscape mode!</div>
     <div id="window-size-message">Please increase your browser window size!</div>
+    <div id="loading-progress">Loading... 0%</div> <!-- Loading progress -->
+
     <script src="Build/Build.loader.js"></script>
     <script>
       function checkDeviceAndWindowSize() {
@@ -84,6 +100,9 @@
       window.addEventListener('resize', checkDeviceAndWindowSize);
       checkDeviceAndWindowSize();
 
+      const loadingProgress = document.getElementById("loading-progress");
+      loadingProgress.style.display = "block"; // Show the loading progress
+
       createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/Build.data",
         frameworkUrl: "Build/Build.framework.js",
@@ -92,8 +111,13 @@
         companyName: "DefaultCompany",
         productName: "Portfolio",
         productVersion: "0.1",
+      }, (progress) => {
+        // Update the loading progress
+        const progressPercentage = Math.round(progress * 100);
+        loadingProgress.textContent = `Loading... ${progressPercentage}%`;
       }).then(function (unityInstance) {
         window.unityInstance = unityInstance;
+        loadingProgress.style.display = "none"; // Hide the loading progress once the Unity instance is ready
       }).catch(function (message) {
         alert(message);
       });
