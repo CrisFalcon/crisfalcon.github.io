@@ -23,7 +23,7 @@
       }
 
       /* Landscape orientation message */
-      #landscape-message {
+      #landscape-message, #window-size-message {
         display: none;
         position: fixed;
         top: 50%;
@@ -44,34 +44,45 @@
           display: block;
         }
       }
+
+      /* Message for small window size on non-mobile devices */
+      @media screen and (min-width: 1px) and (min-height: 1px) {
+        #window-size-message {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
     <canvas id="unity-canvas" tabindex="-1"></canvas>
     <div id="landscape-message">Please rotate your device to landscape mode (desktop version recommended).</div>
+    <div id="window-size-message">Please increase your window size.</div>
     <script src="Build/Build.loader.js"></script>
     <script>
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
+      function checkDeviceAndWindowSize() {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const landscapeMessage = document.getElementById("landscape-message");
+        const windowSizeMessage = document.getElementById("window-size-message");
+        const canvas = document.getElementById("unity-canvas");
 
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.style.position = "fixed";
-
-        document.body.style.textAlign = "left";
+        if (isMobile) {
+          landscapeMessage.style.display = window.innerWidth > window.innerHeight ? "none" : "block";
+          windowSizeMessage.style.display = "none";
+          canvas.style.display = window.innerWidth > window.innerHeight ? "block" : "none";
+        } else {
+          if (window.innerWidth < 800 || window.innerHeight < 600) {  // Adjust these values as needed
+            canvas.style.display = "none";
+            windowSizeMessage.style.display = "block";
+          } else {
+            canvas.style.display = "block";
+            windowSizeMessage.style.display = "none";
+          }
+          landscapeMessage.style.display = "none";
+        }
       }
 
-      function resizeCanvas() {
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
+      window.addEventListener('resize', checkDeviceAndWindowSize);
+      checkDeviceAndWindowSize();
 
       createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/Build.data",
