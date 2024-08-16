@@ -1,131 +1,126 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Cristian Falcon | Portfolio</title>
-    <style>
-      body, html {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        text-align: center;
-        background-color: black;
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Cristian Falcon | Portfolio</title>
+  <style>
+    body,
+    html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      text-align: center;
+      background-color: black;
+    }
+
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      background: #231F20;
+      display: block;
+    }
+
+    /* Loading message */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 2em;
+      background-color: rgba(0, 0, 0, 1);
+      z-index: 9999;
+    }
+
+    /* Landscape orientation message */
+    #landscape-message,
+    #window-size-message {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 2em;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    @media screen and (orientation: portrait) {
+      #unity-canvas {
+        display: none;
       }
 
-      #unity-canvas {
-        width: 100%;
-        height: 100%;
-        background: #231F20;
+      #landscape-message {
         display: block;
       }
+    }
 
-      /* Loading message */
-      #loading-overlay {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        font-size: 2em;
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 20px;
-        border-radius: 10px;
-        z-index: 9999; /* Ensure it's on top of everything */
-      }
-
-      /* Landscape orientation message */
-      #landscape-message, #window-size-message {
+    /* Message for small window size on non-mobile devices */
+    @media screen and (min-width: 1px) and (min-height: 1px) {
+      #window-size-message {
         display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        font-size: 2em;
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 20px;
-        border-radius: 10px;
       }
+    }
+  </style>
+</head>
 
-      @media screen and (orientation: portrait) {
-        #unity-canvas {
-          display: none;
-        }
-        #landscape-message {
-          display: block;
-        }
-      }
+<body>
+  <div id="loading-overlay">Loading...</div>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="landscape-message">Please rotate your device to landscape mode!</div>
+  <div id="window-size-message">Please increase your browser window size!</div>
+  <script src="Build/Build.loader.js"></script>
+  <script>
+    function checkDeviceAndWindowSize() {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const landscapeMessage = document.getElementById("landscape-message");
+      const windowSizeMessage = document.getElementById("window-size-message");
+      const canvas = document.getElementById("unity-canvas");
 
-      /* Message for small window size on non-mobile devices */
-      @media screen and (min-width: 1px) and (min-height: 1px) {
-        #window-size-message {
-          display: none;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="loading-overlay">Loading...</div>
-    <canvas id="unity-canvas" tabindex="-1"></canvas>
-    <div id="landscape-message">Please rotate your device to landscape mode!</div>
-    <div id="window-size-message">Please increase your browser window size!</div>
-    <script src="Build/Build.loader.js"></script>
-    <script>
-      function checkDeviceAndWindowSize() {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        const landscapeMessage = document.getElementById("landscape-message");
-        const windowSizeMessage = document.getElementById("window-size-message");
-        const canvas = document.getElementById("unity-canvas");
-        const loadingOverlay = document.getElementById("loading-overlay");
-
-        if (isMobile) {
-          if (window.innerWidth > window.innerHeight) {
-            landscapeMessage.style.display = "none";
-            canvas.style.display = "block";
-            loadingOverlay.style.display = "none"; // Hide loading message
-          } else {
-            landscapeMessage.style.display = "block";
-            canvas.style.display = "none";
-            loadingOverlay.style.display = "none"; // Hide loading message
-          }
-          windowSizeMessage.style.display = "none";
+      if (isMobile) {
+        landscapeMessage.style.display = window.innerWidth > window.innerHeight ? "none" : "block";
+        windowSizeMessage.style.display = "none";
+        canvas.style.display = window.innerWidth > window.innerHeight ? "block" : "none";
+      } else {
+        if (window.innerWidth < 800 || window.innerHeight < 600) {  // Adjust these values as needed
+          canvas.style.display = "none";
+          windowSizeMessage.style.display = "block";
         } else {
-          if (window.innerWidth < 800 || window.innerHeight < 600) { // Adjust these values as needed
-            canvas.style.display = "none";
-            windowSizeMessage.style.display = "block";
-            loadingOverlay.style.display = "none"; // Hide loading message
-          } else {
-            canvas.style.display = "block";
-            windowSizeMessage.style.display = "none";
-            loadingOverlay.style.display = "none"; // Hide loading message
-          }
-          landscapeMessage.style.display = "none";
+          canvas.style.display = "block";
+          windowSizeMessage.style.display = "none";
         }
+        landscapeMessage.style.display = "none";
       }
+    }
 
-      window.addEventListener('resize', checkDeviceAndWindowSize);
+    window.addEventListener('resize', checkDeviceAndWindowSize);
+    checkDeviceAndWindowSize();
 
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/Build.data",
-        frameworkUrl: "Build/Build.framework.js",
-        codeUrl: "Build/Build.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Portfolio",
-        productVersion: "0.1",
-      }).then(function (unityInstance) {
-        window.unityInstance = unityInstance;
-        checkDeviceAndWindowSize(); // Ensure the loading message is updated based on device/window size
-        document.getElementById("loading-overlay").style.display = "none"; // Hide loading message
-      }).catch(function (message) {
-        alert(message);
-      });
+    createUnityInstance(document.querySelector("#unity-canvas"), {
+      dataUrl: "Build/Build.data",
+      frameworkUrl: "Build/Build.framework.js",
+      codeUrl: "Build/Build.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "Portfolio",
+      productVersion: "0.1",
+    }).then(function (unityInstance) {
+      window.unityInstance = unityInstance;
+      document.getElementById("loading-overlay").style.display = "none"; // Hide loading message
+    }).catch(function (message) {
+      alert(message);
+    });
+  </script>
+</body>
 
-      // Initial check to ensure the correct display state
-      checkDeviceAndWindowSize();
-    </script>
-  </body>
 </html>
