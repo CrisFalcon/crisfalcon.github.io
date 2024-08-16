@@ -107,7 +107,6 @@
       }
 
       window.addEventListener('resize', checkDeviceAndWindowSize);
-      checkDeviceAndWindowSize();
 
       createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/Build.data",
@@ -120,9 +119,13 @@
       }).then(function (unityInstance) {
         window.unityInstance = unityInstance;
         checkDeviceAndWindowSize(); // Ensure the loading message is updated based on device/window size
+        document.getElementById("loading-overlay").style.display = "none"; // Hide loading message
       }).catch(function (message) {
         alert(message);
       });
+
+      // Initial check to ensure the correct display state
+      checkDeviceAndWindowSize();
     </script>
   </body>
 </html>
